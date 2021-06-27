@@ -1,2 +1,4 @@
 # ToolAssistedStupidity
-Break Smash with style.
+
+Mod designed for Smash Ultimate
+Still very WIP
