@@ -1,0 +1,24 @@
+[package]
+name = "TAS"
+version = "0.0.0"
+authors = ["PickL"]
+edition = "2018"
+
+[package.metadata.skyline]
+titleid = "01006A800016E000"
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+skyline = { git = "https://github.com/ultimate-research/skyline-rs.git" }
+skyline_smash = { git = "https://github.com/ultimate-research/skyline-smash.git", features = ["weak_l2cvalue"] }
+acmd = { git = "https://github.com/ultimate-research/skyline-acmd.git" }
+smashline = { git = "https://github.com/blu-dev/smashline"}
+
+[profile.dev]
+panic = "abort"
+
+[profile.release]
+panic = "abort"
+lto = true
