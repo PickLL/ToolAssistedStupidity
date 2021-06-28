@@ -16,6 +16,7 @@ Star and screen kos are gone
 Rage is gone
 Trip chance is gone
 Grabs have more range
+Airdodges are faster, can be done from jumpsquat and can be acted out of
 
 -Per Character-
 -Cancels-
@@ -118,8 +119,8 @@ Static UpB
 Static SideB
 Static NeutralB
 Static Side Taunt
-
 UpAir is faster and comes out faster
+DownTilt sends down
 
 -Fox-
 Fair is faster and sends you up
