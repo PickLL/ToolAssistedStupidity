@@ -129,22 +129,20 @@ DownTilt has less end lag
 Bair has less end lag
 UpAir's second hit spikes
 UpB comes out faster
-Side B has an ending sweet spot
+SideB has an ending sweet spot
 Fair always spikes
 UpAir has higher base knockback
 
 -Luigi-
 Has lower traction
 
--Puff-
-Air speed increased
-DownB heals
-UpB has a constant hitbox
-DownTilt sends up and has less end lag
-BackAir is faster
-UpTilt has less knockback
-Air jumps go higher
-NeutralB B-Reverses
+-Ness-
+Contsantly has screw attack on ground
+DownB can be jump canceled
+Aerial sideB throws at a steeper angle
+Grounded sideB throws slower but has less end lag
+PkFlash is fast and stuns
+DashAttack is Faster?
 
 -Falcon-
 Gets back air jumps on hit
@@ -158,6 +156,16 @@ DownTilt sends up
 UpB goes higher
 Nair is faster
 DownB has less knockback
+
+-Puff-
+Air speed increased
+DownB heals
+UpB has a constant hitbox
+DownTilt sends up and has less end lag
+BackAir is faster
+UpTilt has less knockback
+Air jumps go higher
+NeutralB B-Reverses
 
 -Sonic-
 Removed
