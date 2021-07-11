@@ -6,6 +6,8 @@ use smash::app::lua_bind::*;
 
 use smashline::*;
 
+use crate::custom::*;
+
 #[acmd_script(agent = "yoshi",script = "game_speciallw",category = ACMD_GAME)]
 pub fn yoshi_downb(fighter: &mut L2CAgentBase) {
     let lua_state = fighter.lua_state_agent;
@@ -39,7 +41,12 @@ pub fn egg_burst(fighter: &mut L2CAgentBase) {
     acmd!(lua_state,{
         frame(Frame=1)
         if(is_excute){
-            EFFECT(hash40("sys_bomb_b"), hash40("top"), 0, 0, 0, 90, 0, 0, 1, 0, 0, 0, 0, 0, 0, true)
+            rust{
+                const vecRot : Vector3f = Vector3f{x: 0.0, y: 0.0, z: 0.0};
+                const vecZero : Vector3f = Vector3f{x: 0.0, y: 0.0, z: 0.0};
+                EffectModule::req_on_joint(module_accessor,Hash40::new("sys_bomb_b"), Hash40::new("top"),&vecRot,&vecZero,1.0,
+                &vecZero,&vecZero,true,0,0,0);
+            }
             ATTACK(ID=0, Part=0, Bone=hash40("top"), Damage=7.0, Angle=270, KBG=50, FKB=0, BKB=60, Size=10.0, X=0.0, Y=0.0, Z=0.0, X2=LUA_VOID, Y2=LUA_VOID, Z2=LUA_VOID, Hitlag=0.6, SDI=1.0, Clang_Rebound=ATTACK_SETOFF_KIND_THRU, FacingRestrict=ATTACK_LR_CHECK_F, SetWeight=false, ShieldDamage=-3, Trip=0.0, Rehit=0, Reflectable=true, Absorbable=false, Flinchless=false, DisableHitlag=false, Direct_Hitbox=false, Ground_or_Air=COLLISION_SITUATION_MASK_GA, Hitbits=COLLISION_CATEGORY_MASK_ALL, CollisionPart=COLLISION_PART_MASK_ALL, FriendlyFire=false, Effect=hash40("collision_attr_normal"), SFXLevel=ATTACK_SOUND_LEVEL_M, SFXType=COLLISION_SOUND_ATTR_YOSHI_EGG_HIT, Type=ATTACK_REGION_OBJECT)
             //as_hash__const(hash40("rbkind_explosion"), 0, false)
             //ControlModule::set_rumble()
@@ -283,7 +290,9 @@ pub fn yoshi_nair(fighter: &mut L2CAgentBase) {
         frame(Frame=3)
         if(is_excute){
             WorkModule::on_flag(Flag=FIGHTER_STATUS_ATTACK_AIR_FLAG_ENABLE_LANDING)
-            EFFECT(hash40("sys_bomb_b"), hash40("top"), 0, 0, 0, 90, 0, 0, 1, 0, 0, 0, 0, 0, 0, true)
+            rust{
+                effect_on_joint(module_accessor,Hash40::new("sys_bomb_b"), Hash40::new("top"),&Vector3f{x:0.0,y:0.0,z:0.0},&Vector3f{x:90.0,y:0.0,z:0.0},1.0);
+            }
             ATTACK(ID=0, Part=0, Bone=hash40("top"), Damage=10.0, Angle=361, KBG=86, FKB=0, BKB=50, Size=10.0, X=0.0, Y=4.3, Z=7.5, X2=0.0, Y2=3.0, Z2=-1.0, Hitlag=1.0, SDI=1.0, Clang_Rebound=ATTACK_SETOFF_KIND_ON, FacingRestrict=ATTACK_LR_CHECK_POS, SetWeight=false, ShieldDamage=0, Trip=0.0, Rehit=0, Reflectable=false, Absorbable=false, Flinchless=false, DisableHitlag=false, Direct_Hitbox=true, Ground_or_Air=COLLISION_SITUATION_MASK_GA, Hitbits=COLLISION_CATEGORY_MASK_ALL, CollisionPart=COLLISION_PART_MASK_ALL, FriendlyFire=false, Effect=hash40("collision_attr_normal"), SFXLevel=ATTACK_SOUND_LEVEL_L, SFXType=COLLISION_SOUND_ATTR_KICK, Type=ATTACK_REGION_KICK)
         }
         frame(Frame=5)
@@ -321,7 +330,12 @@ pub fn yoshi_neutralb2(fighter: &mut L2CAgentBase) {
         frame(Frame=21)
         if(is_excute){
             WorkModule::on_flag(Flag=FIGHTER_YOSHI_STATUS_SPECIAL_N_FLAG_SPIT)
-            EFFECT(hash40("sys_bomb_b"), hash40("top"), 0, 0, 0, 90, 0, 0, 1, 0, 0, 0, 0, 0, 0, true)
+            rust{
+                const vecRot : Vector3f = Vector3f{x: 0.0, y: 0.0, z: 0.0};
+                const vecZero : Vector3f = Vector3f{x: 0.0, y: 0.0, z: 0.0};
+                EffectModule::req_on_joint(module_accessor,Hash40::new("sys_bomb_b"), Hash40::new("top"),&vecRot,&vecZero,1.0,
+                &vecZero,&vecZero,true,0,0,0);
+            }
             ATTACK(ID=0, Part=0, Bone=hash40("top"), Damage=10.0, Angle=361, KBG=86, FKB=0, BKB=50, Size=10.0, X=0.0, Y=4.3, Z=7.5, X2=0.0, Y2=3.0, Z2=-1.0, Hitlag=1.0, SDI=1.0, Clang_Rebound=ATTACK_SETOFF_KIND_ON, FacingRestrict=ATTACK_LR_CHECK_POS, SetWeight=false, ShieldDamage=0, Trip=0.0, Rehit=0, Reflectable=false, Absorbable=false, Flinchless=false, DisableHitlag=false, Direct_Hitbox=true, Ground_or_Air=COLLISION_SITUATION_MASK_GA, Hitbits=COLLISION_CATEGORY_MASK_ALL, CollisionPart=COLLISION_PART_MASK_ALL, FriendlyFire=false, Effect=hash40("collision_attr_normal"), SFXLevel=ATTACK_SOUND_LEVEL_L, SFXType=COLLISION_SOUND_ATTR_KICK, Type=ATTACK_REGION_KICK)
         }
         wait(Frames=2)
@@ -333,6 +347,14 @@ pub fn yoshi_neutralb2(fighter: &mut L2CAgentBase) {
 
 
 //EFFECT(hash40("sys_bomb_b"), hash40("top"), 0, 0, 0, 90, 0, 0, 1, 0, 0, 0, 0, 0, 0, true)
+
+/*rust{
+    const vecRot : Vector3f = Vector3f{x: 0.0, y: 0.0, z: 0.0};
+    const vecZero : Vector3f = Vector3f{x: 0.0, y: 0.0, z: 0.0};
+    EffectModule::req_on_joint(module_accessor,Hash40::new("sys_bomb_b"), Hash40::new("top"),&vecRot,&vecZero,1.0,
+    &vecZero,&vecZero,true,0,0,0);
+}*/
+
 //ATTACK(ID=0, Part=0, Bone=hash40("top"), Damage=10.0, Angle=361, KBG=86, FKB=0, BKB=50, Size=10.0, X=0.0, Y=4.3, Z=7.5, X2=0.0, Y2=3.0, Z2=-1.0, Hitlag=1.0, SDI=1.0, Clang_Rebound=ATTACK_SETOFF_KIND_ON, FacingRestrict=ATTACK_LR_CHECK_POS, SetWeight=false, ShieldDamage=0, Trip=0.0, Rehit=0, Reflectable=false, Absorbable=false, Flinchless=false, DisableHitlag=false, Direct_Hitbox=true, Ground_or_Air=COLLISION_SITUATION_MASK_GA, Hitbits=COLLISION_CATEGORY_MASK_ALL, CollisionPart=COLLISION_PART_MASK_ALL, FriendlyFire=false, Effect=hash40("collision_attr_normal"), SFXLevel=ATTACK_SOUND_LEVEL_L, SFXType=COLLISION_SOUND_ATTR_KICK, Type=ATTACK_REGION_KICK)
 //AttackModule::clear(0,false)
 

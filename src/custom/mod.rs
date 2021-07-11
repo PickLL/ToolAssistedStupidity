@@ -9,11 +9,11 @@ use smash::hash40;
 
 use crate::kirby::upb;
 
-use crate::luigi::*;
-
 use crate::pikachu::*;
 
 use crate::ness::*;
+
+use crate::luigi::*;
 
 use smashline::*;
 
@@ -23,6 +23,38 @@ pub static mut seen_de : [[bool ; 8]; 8] = [[false ; 8]; 8];
 
 pub static mut llc : [bool; 8] = [false; 8];
 
+pub static mut wfr : [bool; 8] = [false; 8];
+
+pub fn effect_on_joint(module_accessor : &mut smash::cpp::root::app::BattleObjectModuleAccessor, effect : Hash40, bone : Hash40, position : &Vector3f, rotation : &Vector3f, size : f32){
+    unsafe{
+        const vecZero : Vector3f = Vector3f{x: 0.0, y: 0.0, z: 0.0};
+        EffectModule::req_on_joint(module_accessor,effect,bone,position,rotation,size,
+        &vecZero,&vecZero,true,0,0,0);
+    }
+}
+
+pub fn effect_follow(module_accessor : &mut smash::cpp::root::app::BattleObjectModuleAccessor, effect : Hash40, bone : Hash40, position : &Vector3f, rotation : &Vector3f, size : f32){
+    unsafe{
+        const vecZero : Vector3f = Vector3f{x: 0.0, y: 0.0, z: 0.0};
+        EffectModule::req_follow(module_accessor,effect,bone,position,rotation,size,
+        true,0,0,0,0,0,false,false);
+    }
+}
+
+pub fn kill_kind(module_accessor : &mut smash::cpp::root::app::BattleObjectModuleAccessor, effect : Hash40){
+    unsafe{
+        EffectModule::kill_kind(module_accessor,effect,false,true);
+    }
+}
+
+/*
+const vecRot : Vector3f = Vector3f{x: 0.0, y: 0.0, z: 0.0};
+const vecZero : Vector3f = Vector3f{x: 0.0, y: 0.0, z: 0.0};
+EffectModule::req_on_joint(module_accessor,Hash40::new("sys_bomb_b"), Hash40::new("top"),&vecRot,&vecZero,1.0,
+&vecZero,&vecZero,true,0,0,0);
+*/
+
+
 fn is_button_at_all(module_accessor : &mut smash::cpp::root::app::BattleObjectModuleAccessor) -> bool{
     unsafe{
         let cat = ControlModule::get_command_flag_cat(module_accessor, 0);
@@ -31,6 +63,37 @@ fn is_button_at_all(module_accessor : &mut smash::cpp::root::app::BattleObjectMo
         }
         else{
             false
+        }
+    }
+}
+
+#[smashline::fighter_init]
+pub fn fighter_init(fighter : &mut L2CFighterCommon){
+    unsafe{
+        let module_accessor = smash::app::sv_system::battle_object_module_accessor(fighter.lua_state_agent);
+        let player_no : usize = CameraModule::get_player_no(module_accessor,0) as usize;
+        if player_no == 0{
+            reset(module_accessor);
+        }
+        pcReset(module_accessor);
+    }
+}
+
+pub fn reset(module_accessor : &mut smash::cpp::root::app::BattleObjectModuleAccessor){
+    println!("hi");
+}
+
+pub fn pcReset(module_accessor : &mut smash::cpp::root::app::BattleObjectModuleAccessor){
+    unsafe{
+        let fighter_kind = smash::app::utility::get_kind(module_accessor);
+        let player_no : usize = CameraModule::get_player_no(module_accessor,0) as usize;
+        if fighter_kind == *FIGHTER_KIND_PIKACHU{
+            staticCharge[player_no] = staticDef;
+            effect_follow(module_accessor,Hash40::new("pikachu_elec2"), Hash40::new("top"),&Vector3f{x:0.8,y:4.0,z:0.0},&Vector3f{x:0.0,y:0.0,z:0.0},1.0);
+            hasElec[player_no] = true;
+        }
+        if fighter_kind == *FIGHTER_KIND_LUIGI{
+            mode[player_no] = false;
         }
     }
 }
@@ -102,7 +165,7 @@ pub fn global_fighter_frame(fighter : &mut L2CFighterCommon) {
         ("attack_hi3",*FIGHTER_KIND_GANON,60.0),("special_hi",*FIGHTER_KIND_MARIO,f32::INFINITY),("attack_hi4",*FIGHTER_KIND_LINK,41.0),("attack_hi4",*FIGHTER_KIND_SAMUS,27.0),("attack_hi4",*FIGHTER_KIND_SAMUSD,27.0),
         ("attack_hi3",*FIGHTER_KIND_SAMUS,17.0),("attack_hi3",*FIGHTER_KIND_SAMUSD,17.0),("attack_hi4",*FIGHTER_KIND_CAPTAIN,f32::INFINITY),("attack_hi3",*FIGHTER_KIND_CAPTAIN,23.0),
         ("special_lw_l",*FIGHTER_KIND_PURIN,f32::INFINITY),("special_lw_r",*FIGHTER_KIND_PURIN,f32::INFINITY),("special_air_lw_l",*FIGHTER_KIND_PURIN,f32::INFINITY),("special_air_lw_r",*FIGHTER_KIND_PURIN,f32::INFINITY),
-        ("attack_lw4",*FIGHTER_KIND_PIKACHU,22.0),("attack_dash",*FIGHTER_KIND_NESS,25.0),("special_s_start",*FIGHTER_KIND_CAPTAIN,f32::INFINITY)];
+        ("attack_lw4",*FIGHTER_KIND_PIKACHU,22.0),("attack_dash",*FIGHTER_KIND_NESS,25.0),("special_s_start",*FIGHTER_KIND_CAPTAIN,f32::INFINITY),("attack_dash",*FIGHTER_KIND_LUIGI,26.0),("special_lw",*FIGHTER_KIND_LUIGI,45.0),("attack_hi3",*FIGHTER_KIND_CAPTAIN,31.0)];
         let check = (MotionModule::motion_kind(module_accessor),fighter_kind);
         let mut found = false;
         for i in &cancel_black{
@@ -171,8 +234,6 @@ pub fn global_fighter_frame(fighter : &mut L2CFighterCommon) {
         }else if situation_kind == SITUATION_KIND_GROUND && llc[player_no]{
             llc[player_no] = false;
         }
-
-        WorkModule::set_flag(module_accessor,false,*FIGHTER_STATUS_WORK_ID_FLAG_RESERVE_ATTACK_DISABLE_MINI_JUMP_ATTACK);
     }
 }
 
@@ -200,7 +261,7 @@ fn fox_frame(fighter: &mut L2CFighterCommon) {
                     if situation_kind == SITUATION_KIND_GROUND{
                         StatusModule::change_status_request_from_script(module_accessor,*FIGHTER_STATUS_KIND_JUMP_SQUAT, true);
                     } else{
-                        StatusModule::change_status_request_from_script(module_accessor,*FIGHTER_STATUS_KIND_JUMP, true);
+                        StatusModule::change_status_request_from_script(module_accessor,*FIGHTER_STATUS_KIND_JUMP_AERIAL, true);
                     }
                 }
             }
@@ -339,21 +400,41 @@ fn pikachu_frame(fighter: &mut L2CFighterCommon) {
         let player_no : usize = CameraModule::get_player_no(module_accessor,0) as usize;
         let status_kind = smash::app::lua_bind::StatusModule::status_kind(module_accessor);
 
-        //Static Charge
-        //println!("{}",staticCharge[player_no]);
+        //add static charge on character death
+        //in status_de 2 is dead 1 is spawn
         for x in 0..8{
             if status_de[x] == 2 && seen_de[player_no][x] == false{
                 staticCharge[player_no] += 1;
                 seen_de[player_no][x] = true;
+                if x == player_no{
+                    wfr[player_no] = true;
+                }
             } else if status_de[x] == 1 && seen_de[player_no][x] == false && x == player_no{
                 staticCharge[player_no] = staticDef;
                 seen_de[player_no][x] = true;
             }
         }
 
+        if status_kind == *FIGHTER_STATUS_KIND_REBIRTH && wfr[player_no]{
+            effect_follow(module_accessor,Hash40::new("pikachu_elec2"), Hash40::new("top"),&Vector3f{x:0.8,y:4.0,z:0.0},&Vector3f{x:0.0,y:0.0,z:0.0},1.0);
+            hasElec[player_no] = true;
+            wfr[player_no] = false
+        }
+
+        //spawn/kill static effects
+
+        if staticCharge[player_no] == 0 && hasElec[player_no]{
+            kill_kind(module_accessor,Hash40::new("pikachu_elec2"));
+            hasElec[player_no] = false;
+        } else if staticCharge[player_no] >= 1 && !hasElec[player_no]{
+            effect_follow(module_accessor,Hash40::new("pikachu_elec2"), Hash40::new("top"),&Vector3f{x:0.8,y:4.0,z:0.0},&Vector3f{x:0.0,y:0.0,z:0.0},1.0);
+            hasElec[player_no] = true;
+        }
+        //cheat lol
         if smash::app::smashball::is_training_mode(){
              staticCharge[player_no] = 999;
         }
+
     }
 }
 
@@ -362,47 +443,18 @@ fn luigi_frame(fighter: &mut L2CFighterCommon) {
     unsafe {
         let module_accessor = smash::app::sv_system::battle_object_module_accessor(fighter.lua_state_agent);
         let player_no : usize = CameraModule::get_player_no(module_accessor,0) as usize;
-        let sy = ControlModule::get_stick_y(module_accessor);
-        let sx = ControlModule::get_stick_x(module_accessor)*PostureModule::lr(module_accessor);
-
-        if upcharge[player_no] >= 0 && upcharge[player_no] < chargemax && sy >= 0.5{
-            upcharge[player_no] += 1;
-        } else if upcharge[player_no] == chargemax && !(sy >= 0.5){
-            upcharge[player_no] = flicktime * -1;
-        } else if upcharge[player_no] < 0 && !(sy >= 0.5){
-            upcharge[player_no] +=1;
-        } else if ( upcharge[player_no] > 0 && !(sy >= 0.5) ) || upcharge[player_no] <0 && sy >= 0.5{
-            upcharge[player_no] = 0;
-        }
-
-        if downcharge[player_no] >= 0 && downcharge[player_no] < chargemax && sy <= -0.5{
-            downcharge[player_no] += 1;
-        } else if downcharge[player_no] == chargemax && !(sy <= -0.5){
-            downcharge[player_no] = flicktime * -1;
-        } else if downcharge[player_no] < 0 && !(sy <= -0.5){
-            downcharge[player_no] +=1;
-        } else if ( downcharge[player_no] > 0 && !(sy <= -0.5) ) || downcharge[player_no] <0 && sy >= 0.5{
-            downcharge[player_no] = 0;
-        }
-
-        if frontcharge[player_no] >= 0 && frontcharge[player_no] < chargemax && sx >= 0.5{
-            frontcharge[player_no] += 1;
-        } else if frontcharge[player_no] == chargemax && !(sx >= 0.5){
-            frontcharge[player_no] = flicktime * -1;
-        } else if frontcharge[player_no] < 0 && !(sx >= 0.5){
-            frontcharge[player_no] +=1;
-        } else if ( frontcharge[player_no] > 0 && !(sx >= 0.5) ) || frontcharge[player_no] <0 && sx >= 0.5{
-            frontcharge[player_no] = 0;
-        }
-
-        if backcharge[player_no] >= 0 && backcharge[player_no] < chargemax && sx <= -0.5{
-            backcharge[player_no] += 1;
-        } else if backcharge[player_no] == chargemax && !(sx <= -0.5){
-            backcharge[player_no] = flicktime * -1;
-        } else if backcharge[player_no] < 0 && !(sx <= -0.5){
-            backcharge[player_no] +=1;
-        } else if ( backcharge[player_no] > 0 && !(sx <= -0.5) ) || backcharge[player_no] <0 && sx <= -0.5{
-            backcharge[player_no] = 0;
+        let situation_kind = StatusModule::situation_kind(module_accessor);
+        if mode[player_no]{
+            AttackModule::set_power_mul(module_accessor,2.0);
+            GroundModule::set_collidable(module_accessor,false);
+            let speedVec = Vector3f{x: 0.0, y: 0.01, z: 0.0};
+            KineticModule::add_speed(module_accessor, &speedVec);
+            if situation_kind == SITUATION_KIND_GROUND{
+                StatusModule::change_status_request_from_script(module_accessor, *FIGHTER_STATUS_KIND_FALL, true);
+            }
+        } else{
+            AttackModule::set_power_mul(module_accessor,1.0);
+            GroundModule::set_collidable(module_accessor,true);
         }
     }
 }
@@ -419,7 +471,11 @@ pub fn install() {
         falcon_frame,
         duckhunt_frame,
         pikachu_frame,
-        luigi_frame,
-        ness_frame
+        ness_frame,
+        luigi_frame
+    );
+
+    install_agent_init_callbacks!(
+        fighter_init
     );
 }

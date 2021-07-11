@@ -14,6 +14,8 @@ pub static mut hasSavedPosition : [bool; 8] = [false; 8];
 
 pub static staticDef : u32 = 3;
 
+pub static mut hasElec : [bool; 8] = [false; 8];
+
 #[acmd_script(agent = "pikachu",scripts = ["game_speciallw","game_specialairlw"],category = ACMD_GAME)]
 pub fn pikachu_downb(fighter: &mut L2CAgentBase) {
     unsafe{
