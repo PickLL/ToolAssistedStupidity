@@ -24,7 +24,6 @@ pub fn mario_upair(fighter: & mut L2CAgentBase) {
         }
         frame(Frame=9)
         if(is_excute){
-            FT_MOTION_RATE(0.5)
             AttackModule::clear_all()
         }
         frame(Frame=18)
@@ -71,7 +70,7 @@ pub fn mario_fair(fighter: &mut L2CAgentBase) {
 pub fn mario_downtilt(fighter: &mut L2CAgentBase) {
     let lua_state = fighter.lua_state_agent;
     acmd!(lua_state,{
-        FT_MOTION_RATE(3.5)
+        FT_MOTION_RATE(2.5)
         frame(Frame=5)
         if(is_excute){
             ATTACK(ID=0, Part=0, Bone=hash40("kneel"), Damage=7.0, Angle=80, KBG=80, FKB=0, BKB=35, Size=3.2, X=-1.0, Y=0.0, Z=0.0, X2=LUA_VOID, Y2=LUA_VOID, Z2=LUA_VOID, Hitlag=1.0, SDI=1.0, Clang_Rebound=ATTACK_SETOFF_KIND_ON, FacingRestrict=ATTACK_LR_CHECK_POS, SetWeight=false, ShieldDamage=0, Trip=0.4, Rehit=0, Reflectable=false, Absorbable=false, Flinchless=false, DisableHitlag=false, Direct_Hitbox=true, Ground_or_Air=COLLISION_SITUATION_MASK_GA, Hitbits=COLLISION_CATEGORY_MASK_ALL, CollisionPart=COLLISION_PART_MASK_ALL, FriendlyFire=false, Effect=hash40("collision_attr_paralyze"), SFXLevel=ATTACK_SOUND_LEVEL_M, SFXType=COLLISION_SOUND_ATTR_KICK, Type=ATTACK_REGION_KICK)

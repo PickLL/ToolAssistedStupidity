@@ -167,7 +167,6 @@ pub fn falcon_sidebend(fighter: &mut L2CAgentBase) {
         FT_MOTION_RATE(FSM=0.6)
         if(is_excute){
             JostleModule::set_status(false)
-            sv_module_access::damage(MA_MSC_DAMAGE_DAMAGE_NO_REACTION, DAMAGE_NO_REACTION_MODE_DAMAGE_POWER, 10.0)
         }
         frame(Frame=4)
         if(is_excute){
@@ -184,7 +183,7 @@ pub fn falcon_sidebend(fighter: &mut L2CAgentBase) {
             AttackModule::set_add_reaction_frame(ID=0, Frames=3.0, Unk=false)
         }
         wait(Frames=2)
-        FT_MOTION_RATE(FSM=0.75)
+        FT_MOTION_RATE(FSM=2)
         if(is_excute){
             AttackModule::clear_all()
             JostleModule::set_status(true)
@@ -287,14 +286,14 @@ pub fn falcon_airupb(fighter: &mut L2CAgentBase) {
         wait(Frames=1)
         if(is_excute){
             WorkModule::on_flag(Flag=FIGHTER_STATUS_SUPER_JUMP_PUNCH_FLAG_REVERSE_LR)
-            CATCH(ID=0, Bone=hash40("top"), Size=8.0, X=0.0, Y=13.0, Z=7.0, Status=FIGHTER_STATUS_KIND_CLUNG_CAPTAIN, Ground_or_Air=COLLISION_SITUATION_MASK_GA)
-            CATCH(ID=1, Bone=hash40("top"), Size=8.5, X=0.0, Y=8.8, Z=13.7, Status=FIGHTER_STATUS_KIND_CLUNG_CAPTAIN, Ground_or_Air=COLLISION_SITUATION_MASK_G)
+            CATCH(ID=0, Bone=hash40("top"), Size=5.0, X=0.0, Y=13.0, Z=7.0, Status=FIGHTER_STATUS_KIND_CLUNG_CAPTAIN, Ground_or_Air=COLLISION_SITUATION_MASK_GA)
+            CATCH(ID=1, Bone=hash40("top"), Size=5.5, X=0.0, Y=8.8, Z=13.7, Status=FIGHTER_STATUS_KIND_CLUNG_CAPTAIN, Ground_or_Air=COLLISION_SITUATION_MASK_G)
             ATTACK_ABS(Kind=FIGHTER_ATTACK_ABSOLUTE_KIND_CATCH, ID=0, Damage=6.0, Angle=0, KBG=50, FKB=0, BKB=70, Hitlag=0.0, Unk=1.0, FacingRestrict=ATTACK_LR_CHECK_F, Unk=0.0, Unk=true, Effect=hash40("collision_attr_normal"), SFXLevel=ATTACK_SOUND_LEVEL_S, SFXType=COLLISION_SOUND_ATTR_KICK, Type=ATTACK_REGION_THROW)
         }
         wait(Frames=1)
         if(is_excute){
-            CATCH(ID=0, Bone=hash40("top"), Size=8.0, X=0.0, Y=15.0, Z=6.0, Status=FIGHTER_STATUS_KIND_CLUNG_CAPTAIN, Ground_or_Air=COLLISION_SITUATION_MASK_GA)
-            CATCH(ID=1, Bone=hash40("top"), Size=8.0, X=0.0, Y=11.0, Z=6.0, Status=FIGHTER_STATUS_KIND_CLUNG_CAPTAIN, Ground_or_Air=COLLISION_SITUATION_MASK_GA)
+            CATCH(ID=0, Bone=hash40("top"), Size=5.0, X=0.0, Y=15.0, Z=6.0, Status=FIGHTER_STATUS_KIND_CLUNG_CAPTAIN, Ground_or_Air=COLLISION_SITUATION_MASK_GA)
+            CATCH(ID=1, Bone=hash40("top"), Size=5.0, X=0.0, Y=11.0, Z=6.0, Status=FIGHTER_STATUS_KIND_CLUNG_CAPTAIN, Ground_or_Air=COLLISION_SITUATION_MASK_GA)
         }
         frame(Frame=19)
         if(is_excute){

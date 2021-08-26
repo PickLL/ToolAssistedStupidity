@@ -114,7 +114,7 @@ pub fn global_fighter_frame(fighter : &mut L2CFighterCommon) {
         // (MoveState, Character, Frame, Air/Ground/Both)
         // Cancels on hit                0   1      2
 
-        let cancel = [("special_lw",*FIGHTER_KIND_KIRBY,0.0,2),("special_air_lw",*FIGHTER_KIND_KIRBY,0.0,2),("special_air_s_end",*FIGHTER_KIND_CAPTAIN,0.0,2)];
+        let cancel = [("special_lw",*FIGHTER_KIND_KIRBY,0.0,2),("special_air_lw",*FIGHTER_KIND_KIRBY,0.0,2),("special_air_s_end",*FIGHTER_KIND_CAPTAIN,0.0,2),("special_hi_jump",*FIGHTER_KIND_DEDEDE,0.0,0)];
         for i in &cancel{
             if AttackModule::is_infliction_status(module_accessor, *COLLISION_KIND_MASK_HIT){
                 if MotionModule::motion_kind(module_accessor) == smash::hash40(i.0) && fighter_kind == i.1 && MotionModule::frame(module_accessor) >= i.2{
@@ -143,7 +143,9 @@ pub fn global_fighter_frame(fighter : &mut L2CFighterCommon) {
 
         let cancel_jump = [("attack_dash",*FIGHTER_KIND_MARIO,0.0),("special_air_s",*FIGHTER_KIND_DONKEY,0.0),("special_s1",*FIGHTER_KIND_LINK,28.0),("special_air_s1",*FIGHTER_KIND_LINK,28.0),
         ("special_air_lw",*FIGHTER_KIND_CAPTAIN,0.0),("special_lw",*FIGHTER_KIND_CAPTAIN,0.0),("special_s_loop",*FIGHTER_KIND_YOSHI,0.0),("special_air_s_loop",*FIGHTER_KIND_YOSHI,0.0),
-        ("special_air_s_start",*FIGHTER_KIND_YOSHI,5.0),("special_air_s",*FIGHTER_KIND_PURIN,0.0),("special_s",*FIGHTER_KIND_PURIN,0.0)];
+        ("special_air_s_start",*FIGHTER_KIND_YOSHI,5.0),("special_air_s",*FIGHTER_KIND_PURIN,0.0),("special_s",*FIGHTER_KIND_PURIN,0.0),
+        ("special_air_hi",*FIGHTER_KIND_SHEIK,0.0),("special_air_hi_start",*FIGHTER_KIND_SHEIK,0.0),("special_lw_attack",*FIGHTER_KIND_SHEIK,0.0),
+        ("special_air_lw",*FIGHTER_KIND_SHEIK,0.0),("special_lw",*FIGHTER_KIND_SHEIK,0.0)];
         for i in &cancel_jump{
             if MotionModule::motion_kind(module_accessor) == smash::hash40(i.0) && fighter_kind == i.1 && MotionModule::frame(module_accessor) >= i.2{
                 if WorkModule::get_int(module_accessor,*FIGHTER_INSTANCE_WORK_ID_INT_JUMP_COUNT) != WorkModule::get_int(module_accessor,*FIGHTER_INSTANCE_WORK_ID_INT_JUMP_COUNT_MAX){
@@ -154,6 +156,8 @@ pub fn global_fighter_frame(fighter : &mut L2CFighterCommon) {
                         } else{
                             StatusModule::change_status_request_from_script(module_accessor,*FIGHTER_STATUS_KIND_JUMP, true);
                         }
+                        let jumps = WorkModule::get_int(module_accessor,*FIGHTER_INSTANCE_WORK_ID_INT_JUMP_COUNT);
+                        WorkModule::set_int(module_accessor,jumps+1,*FIGHTER_INSTANCE_WORK_ID_INT_JUMP_COUNT);
                     }
                 }
             }
@@ -165,7 +169,8 @@ pub fn global_fighter_frame(fighter : &mut L2CFighterCommon) {
         ("attack_hi3",*FIGHTER_KIND_GANON,60.0),("special_hi",*FIGHTER_KIND_MARIO,f32::INFINITY),("attack_hi4",*FIGHTER_KIND_LINK,41.0),("attack_hi4",*FIGHTER_KIND_SAMUS,27.0),("attack_hi4",*FIGHTER_KIND_SAMUSD,27.0),
         ("attack_hi3",*FIGHTER_KIND_SAMUS,17.0),("attack_hi3",*FIGHTER_KIND_SAMUSD,17.0),("attack_hi4",*FIGHTER_KIND_CAPTAIN,f32::INFINITY),("attack_hi3",*FIGHTER_KIND_CAPTAIN,23.0),
         ("special_lw_l",*FIGHTER_KIND_PURIN,f32::INFINITY),("special_lw_r",*FIGHTER_KIND_PURIN,f32::INFINITY),("special_air_lw_l",*FIGHTER_KIND_PURIN,f32::INFINITY),("special_air_lw_r",*FIGHTER_KIND_PURIN,f32::INFINITY),
-        ("attack_lw4",*FIGHTER_KIND_PIKACHU,22.0),("attack_dash",*FIGHTER_KIND_NESS,25.0),("special_s_start",*FIGHTER_KIND_CAPTAIN,f32::INFINITY),("attack_dash",*FIGHTER_KIND_LUIGI,26.0),("special_lw",*FIGHTER_KIND_LUIGI,45.0),("attack_hi3",*FIGHTER_KIND_CAPTAIN,31.0)];
+        ("attack_lw4",*FIGHTER_KIND_PIKACHU,22.0),("attack_dash",*FIGHTER_KIND_NESS,25.0),("special_s_start",*FIGHTER_KIND_CAPTAIN,f32::INFINITY),("attack_dash",*FIGHTER_KIND_LUIGI,26.0),("special_lw",*FIGHTER_KIND_LUIGI,45.0),
+        ("attack_hi3",*FIGHTER_KIND_CAPTAIN,31.0),("attack_s4",*FIGHTER_KIND_SHEIK,21.0),("attack_hi3",*FIGHTER_KIND_SHEIK,17.0),("attack_12",*FIGHTER_KIND_DEDEDE,f32::INFINITY),("attack_s3",*FIGHTER_KIND_DEDEDE,24.0)];
         let check = (MotionModule::motion_kind(module_accessor),fighter_kind);
         let mut found = false;
         for i in &cancel_black{
@@ -212,7 +217,7 @@ pub fn global_fighter_frame(fighter : &mut L2CFighterCommon) {
         if fighter_kind == *FIGHTER_KIND_MARTH{
             GrabModule::set_size_mul(module_accessor,100.0);
         } else{
-            GrabModule::set_size_mul(module_accessor,2.5);
+            GrabModule::set_size_mul(module_accessor,2.2);
         }
 
         //airdodge from jumpsquat
@@ -234,6 +239,14 @@ pub fn global_fighter_frame(fighter : &mut L2CFighterCommon) {
         }else if situation_kind == SITUATION_KIND_GROUND && llc[player_no]{
             llc[player_no] = false;
         }
+    }
+}
+
+#[smashline::weapon_frame(agent = WEAPON_KIND_DEDEDE_GORDO)]
+pub fn gordo_frame(weapon: &mut L2CFighterBase){
+    unsafe{
+        let module_accessor = smash::app::sv_system::battle_object_module_accessor(weapon.lua_state_agent);
+        HitModule::set_whole(module_accessor, smash::app::HitStatus(*HIT_STATUS_XLU), 0); 
     }
 }
 
@@ -310,6 +323,11 @@ fn mario_frame(fighter: &mut L2CFighterCommon) {
                 CancelModule::enable_cancel(module_accessor);
             }
         }
+        AttackModule::set_power_mul(module_accessor,1.1);
+
+        if AttackModule::is_infliction_status(module_accessor, *COLLISION_KIND_MASK_HIT) && WorkModule::get_int(module_accessor,*FIGHTER_INSTANCE_WORK_ID_INT_JUMP_COUNT) != 0{
+            WorkModule::set_int(module_accessor,1,*FIGHTER_INSTANCE_WORK_ID_INT_JUMP_COUNT);
+        }
     }
 }
 
@@ -344,16 +362,6 @@ fn ness_frame(fighter: &mut L2CFighterCommon) {
                     }
                 }
             }
-        }
-    }
-}
-
-#[smashline::fighter_frame(agent = FIGHTER_KIND_CAPTAIN)]
-fn falcon_frame(fighter: &mut L2CFighterCommon) {
-    unsafe {
-        let module_accessor = smash::app::sv_system::battle_object_module_accessor(fighter.lua_state_agent);
-        if AttackModule::is_infliction_status(module_accessor, *COLLISION_KIND_MASK_HIT) && WorkModule::get_int(module_accessor,*FIGHTER_INSTANCE_WORK_ID_INT_JUMP_COUNT) != 0{
-            WorkModule::set_int(module_accessor,1,*FIGHTER_INSTANCE_WORK_ID_INT_JUMP_COUNT);
         }
     }
 }
@@ -445,10 +453,13 @@ fn luigi_frame(fighter: &mut L2CFighterCommon) {
         let player_no : usize = CameraModule::get_player_no(module_accessor,0) as usize;
         let situation_kind = StatusModule::situation_kind(module_accessor);
         if mode[player_no]{
-            AttackModule::set_power_mul(module_accessor,2.0);
+            AttackModule::set_power_mul(module_accessor,1.5);
             GroundModule::set_collidable(module_accessor,false);
-            let speedVec = Vector3f{x: 0.0, y: 0.01, z: 0.0};
-            KineticModule::add_speed(module_accessor, &speedVec);
+            let y_vel = KineticModule::get_sum_speed_y(module_accessor, *KINETIC_ENERGY_RESERVE_ATTRIBUTE_MAIN);
+            if y_vel <= 0.0{
+                let speedVec = Vector3f{x: 0.0, y: 0.07, z: 0.0};
+                KineticModule::add_speed(module_accessor, &speedVec);
+            }
             if situation_kind == SITUATION_KIND_GROUND{
                 StatusModule::change_status_request_from_script(module_accessor, *FIGHTER_STATUS_KIND_FALL, true);
             }
@@ -468,11 +479,12 @@ pub fn install() {
         samus_frame,
         mario_frame,
         kirb_frame,
-        falcon_frame,
         duckhunt_frame,
         pikachu_frame,
         ness_frame,
-        luigi_frame
+        luigi_frame,
+
+        gordo_frame
     );
 
     install_agent_init_callbacks!(

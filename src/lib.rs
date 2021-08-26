@@ -21,6 +21,10 @@ mod purin;
 
 mod falco;
 
+mod sheik;
+
+mod dedede;
+
 mod custom;
 
 #[skyline::main(name = "TAS")]
@@ -40,6 +44,10 @@ pub fn main() {
     purin::install();
 
     falco::install();
+
+    sheik::install();
+
+    dedede::install();
 
     custom::install();
 }
