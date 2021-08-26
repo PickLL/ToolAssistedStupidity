@@ -3,4 +3,4 @@ Break Smash with style.
 
 Very WIP
 
-Read Changelog.txt for (incomplete) changes
+Read Changelog.txt for (slightly less) (incomplete) changes
