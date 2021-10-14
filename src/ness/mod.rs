@@ -138,7 +138,7 @@ pub fn ness_pkfire(fighter: &mut L2CAgentBase) {
     let lua_state = fighter.lua_state_agent;
     acmd!(lua_state,{
         frame(Frame=1)
-        FT_MOTION_RATE(FSM=0.85)
+        FT_MOTION_RATE(FSM=2)
         frame(Frame=20)
         FT_MOTION_RATE(FSM=1)
         frame(Frame=21)
@@ -146,7 +146,7 @@ pub fn ness_pkfire(fighter: &mut L2CAgentBase) {
             ArticleModule::generate_article(FIGHTER_NESS_GENERATE_ARTICLE_PK_FIRE,false,0)
             WorkModule::on_flag(Flag=FIGHTER_NESS_STATUS_SPECIAL_S_FLAG_SHOOT)
         }
-        FT_MOTION_RATE(FSM=0.2)
+        FT_MOTION_RATE(FSM=0.1)
     });
 }
 

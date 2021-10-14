@@ -6,8 +6,8 @@ use smash::app::lua_bind::*;
 
 use smashline::*;
 
-#[acmd_script(agent = "purin",script = "game_speciallwr",category = ACMD_GAME)]
-pub fn puff_downbr(fighter: &mut L2CAgentBase) {
+#[acmd_script(agent = "purin",scripts = ["game_speciallwr","game_speciallwl","game_specialairlwr","game_specialairlwl"],category = ACMD_GAME)]
+pub fn puff_downb(fighter: &mut L2CAgentBase) {
     let lua_state = fighter.lua_state_agent;
     acmd!(lua_state,{
         if(is_excute){
@@ -24,82 +24,11 @@ pub fn puff_downbr(fighter: &mut L2CAgentBase) {
         }
         for(24 Iterations){
             if(is_excute){
-                FT_ADD_DAMAGE(-0.5)
-            }
-            wait(Frames=5)
-        }
-    });
-}
-
-#[acmd_script(agent = "purin",script = "game_speciallwl",category = ACMD_GAME)]
-pub fn puff_downbl(fighter: &mut L2CAgentBase) {
-    let lua_state = fighter.lua_state_agent;
-    acmd!(lua_state,{
-        if(is_excute){
-            JostleModule::set_status(false)
-        }
-        frame(Frame=2)
-        if(is_excute){
-            ATTACK(ID=0, Part=0, Bone=hash40("bust"), Damage=20.0, Angle=88, KBG=66, FKB=0, BKB=100, Size=3.8, X=0.0, Y=0.0, Z=0.0, X2=LUA_VOID, Y2=LUA_VOID, Z2=LUA_VOID, Hitlag=1.0, SDI=1.0, Clang_Rebound=ATTACK_SETOFF_KIND_OFF, FacingRestrict=ATTACK_LR_CHECK_POS, SetWeight=false, ShieldDamage=0, Trip=0.0, Rehit=0, Reflectable=false, Absorbable=false, Flinchless=false, DisableHitlag=false, Direct_Hitbox=true, Ground_or_Air=COLLISION_SITUATION_MASK_GA, Hitbits=COLLISION_CATEGORY_MASK_ALL, CollisionPart=COLLISION_PART_MASK_ALL, FriendlyFire=false, Effect=hash40("collision_attr_flower"), SFXLevel=ATTACK_SOUND_LEVEL_L, SFXType=COLLISION_SOUND_ATTR_BAT, Type=ATTACK_REGION_BODY)
-        }
-        wait(Frames=3)
-        if(is_excute){
-            AttackModule::clear_all()
-            JostleModule::set_status(true)
-        }
-        for(24 Iterations){
-            if(is_excute){
-                FT_ADD_DAMAGE(-0.5)
-            }
-            wait(Frames=5)
-        }
-    });
-}
-
-#[acmd_script(agent = "purin",script = "game_specialairlwr",category = ACMD_GAME)]
-pub fn puff_airdownbr(fighter: &mut L2CAgentBase) {
-    let lua_state = fighter.lua_state_agent;
-    acmd!(lua_state,{
-        if(is_excute){
-            JostleModule::set_status(false)
-        }
-        frame(Frame=2)
-        if(is_excute){
-            ATTACK(ID=0, Part=0, Bone=hash40("bust"), Damage=20.0, Angle=88, KBG=66, FKB=0, BKB=100, Size=3.8, X=0.0, Y=0.0, Z=0.0, X2=LUA_VOID, Y2=LUA_VOID, Z2=LUA_VOID, Hitlag=1.0, SDI=1.0, Clang_Rebound=ATTACK_SETOFF_KIND_OFF, FacingRestrict=ATTACK_LR_CHECK_POS, SetWeight=false, ShieldDamage=0, Trip=0.0, Rehit=0, Reflectable=false, Absorbable=false, Flinchless=false, DisableHitlag=false, Direct_Hitbox=true, Ground_or_Air=COLLISION_SITUATION_MASK_GA, Hitbits=COLLISION_CATEGORY_MASK_ALL, CollisionPart=COLLISION_PART_MASK_ALL, FriendlyFire=false, Effect=hash40("collision_attr_flower"), SFXLevel=ATTACK_SOUND_LEVEL_L, SFXType=COLLISION_SOUND_ATTR_BAT, Type=ATTACK_REGION_BODY)
-        }
-        wait(Frames=3)
-        if(is_excute){
-            AttackModule::clear_all()
-            JostleModule::set_status(true)
-        }
-        for(24 Iterations){
-            if(is_excute){
-                FT_ADD_DAMAGE(-0.5)
-            }
-            wait(Frames=5)
-        }
-    });
-}
-
-#[acmd_script(agent = "purin",script = "game_specialairlwr",category = ACMD_GAME)]
-pub fn puff_airdownbl(fighter: &mut L2CAgentBase) {
-    let lua_state = fighter.lua_state_agent;
-    acmd!(lua_state,{
-        if(is_excute){
-            JostleModule::set_status(false)
-        }
-        frame(Frame=2)
-        if(is_excute){
-            ATTACK(ID=0, Part=0, Bone=hash40("bust"), Damage=20.0, Angle=88, KBG=66, FKB=0, BKB=100, Size=3.8, X=0.0, Y=0.0, Z=0.0, X2=LUA_VOID, Y2=LUA_VOID, Z2=LUA_VOID, Hitlag=1.0, SDI=1.0, Clang_Rebound=ATTACK_SETOFF_KIND_OFF, FacingRestrict=ATTACK_LR_CHECK_POS, SetWeight=false, ShieldDamage=0, Trip=0.0, Rehit=0, Reflectable=false, Absorbable=false, Flinchless=false, DisableHitlag=false, Direct_Hitbox=true, Ground_or_Air=COLLISION_SITUATION_MASK_GA, Hitbits=COLLISION_CATEGORY_MASK_ALL, CollisionPart=COLLISION_PART_MASK_ALL, FriendlyFire=false, Effect=hash40("collision_attr_flower"), SFXLevel=ATTACK_SOUND_LEVEL_L, SFXType=COLLISION_SOUND_ATTR_BAT, Type=ATTACK_REGION_BODY)
-        }
-        wait(Frames=3)
-        if(is_excute){
-            AttackModule::clear_all()
-            JostleModule::set_status(true)
-        }
-        for(24 Iterations){
-            if(is_excute){
-                FT_ADD_DAMAGE(-0.5)
+                rust{
+                    if DamageModule::damage(module_accessor, 0) > 0.0{
+                        DamageModule::add_damage(module_accessor, -0.1, 0)
+                    }
+                }
             }
             wait(Frames=5)
         }
@@ -257,7 +186,6 @@ pub fn puff_uptilt(fighter: &mut L2CAgentBase) {
     });
 }
 
-
 #[acmd_script(agent = "purin",scripts = ["game_specialairnstartr","game_specialnstartr"],category = ACMD_GAME)]
 pub fn puff_neutralbsr(fighter: &mut L2CAgentBase) {
     unsafe{
@@ -319,10 +247,7 @@ pub fn puff_dair(fighter: &mut L2CAgentBase) {
 
 pub fn install() {
     install_acmd_scripts!(
-        puff_airdownbl,
-        puff_airdownbr,
-        puff_downbl,
-        puff_downbr,
+        puff_downb,
         puff_fair,
         puff_upbl,
         puff_upbr,

@@ -23,7 +23,13 @@ mod falco;
 
 mod sheik;
 
+mod marth;
+
+mod lucina;
+
 mod dedede;
+
+mod littlemac;
 
 mod custom;
 
@@ -45,9 +51,15 @@ pub fn main() {
 
     falco::install();
 
+    marth::install();
+
+    lucina::install();
+
     sheik::install();
 
     dedede::install();
+
+    littlemac::install();
 
     custom::install();
 }

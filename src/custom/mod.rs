@@ -15,6 +15,10 @@ use crate::ness::*;
 
 use crate::luigi::*;
 
+use crate::marth::*;
+
+use crate::lucina::*;
+
 use smashline::*;
 
 pub static mut status_de : [u32; 8] = [0; 8];
@@ -80,7 +84,7 @@ pub fn fighter_init(fighter : &mut L2CFighterCommon){
 }
 
 pub fn reset(module_accessor : &mut smash::cpp::root::app::BattleObjectModuleAccessor){
-    println!("hi");
+    
 }
 
 pub fn pcReset(module_accessor : &mut smash::cpp::root::app::BattleObjectModuleAccessor){
@@ -94,6 +98,15 @@ pub fn pcReset(module_accessor : &mut smash::cpp::root::app::BattleObjectModuleA
         }
         if fighter_kind == *FIGHTER_KIND_LUIGI{
             mode[player_no] = false;
+        }
+
+        if fighter_kind == *FIGHTER_KIND_MARTH{
+            marth_timer[player_no] = 0;
+        }
+
+        if fighter_kind == *FIGHTER_KIND_LUCINA{
+            lucina_timer[player_no] = 0;
+            lucina_mul[player_no] = 1.0;
         }
     }
 }
@@ -165,24 +178,27 @@ pub fn global_fighter_frame(fighter : &mut L2CFighterCommon) {
 
         //Cancel on hit on ground after hitstun
         //Blacklist
-        let cancel_black = [("special_hi_hold",*FIGHTER_KIND_FOX,f32::INFINITY),("special_hi",*FIGHTER_KIND_DONKEY,62.0),("attack_100",999,f32::INFINITY),("attack_100_sub",999,f32::INFINITY),
+        let cancel_black = vec![("special_hi_hold",*FIGHTER_KIND_FOX,f32::INFINITY),("special_hi",*FIGHTER_KIND_DONKEY,62.0),("attack_100",999,f32::INFINITY),("attack_100_sub",999,f32::INFINITY),
         ("attack_hi3",*FIGHTER_KIND_GANON,60.0),("special_hi",*FIGHTER_KIND_MARIO,f32::INFINITY),("attack_hi4",*FIGHTER_KIND_LINK,41.0),("attack_hi4",*FIGHTER_KIND_SAMUS,27.0),("attack_hi4",*FIGHTER_KIND_SAMUSD,27.0),
         ("attack_hi3",*FIGHTER_KIND_SAMUS,17.0),("attack_hi3",*FIGHTER_KIND_SAMUSD,17.0),("attack_hi4",*FIGHTER_KIND_CAPTAIN,f32::INFINITY),("attack_hi3",*FIGHTER_KIND_CAPTAIN,23.0),
         ("special_lw_l",*FIGHTER_KIND_PURIN,f32::INFINITY),("special_lw_r",*FIGHTER_KIND_PURIN,f32::INFINITY),("special_air_lw_l",*FIGHTER_KIND_PURIN,f32::INFINITY),("special_air_lw_r",*FIGHTER_KIND_PURIN,f32::INFINITY),
         ("attack_lw4",*FIGHTER_KIND_PIKACHU,22.0),("attack_dash",*FIGHTER_KIND_NESS,25.0),("special_s_start",*FIGHTER_KIND_CAPTAIN,f32::INFINITY),("attack_dash",*FIGHTER_KIND_LUIGI,26.0),("special_lw",*FIGHTER_KIND_LUIGI,45.0),
-        ("attack_hi3",*FIGHTER_KIND_CAPTAIN,31.0),("attack_s4",*FIGHTER_KIND_SHEIK,21.0),("attack_hi3",*FIGHTER_KIND_SHEIK,17.0),("attack_12",*FIGHTER_KIND_DEDEDE,f32::INFINITY),("attack_s3",*FIGHTER_KIND_DEDEDE,24.0)];
-        let check = (MotionModule::motion_kind(module_accessor),fighter_kind);
+        ("attack_hi3",*FIGHTER_KIND_CAPTAIN,31.0),("attack_s4_s",*FIGHTER_KIND_SHEIK,21.0),("attack_hi3",*FIGHTER_KIND_SHEIK,17.0),("attack_12",*FIGHTER_KIND_DEDEDE,f32::INFINITY),("attack_s3_s",*FIGHTER_KIND_DEDEDE,24.0),
+        ("attack_s4",*FIGHTER_KIND_LINK,30.0),("attack_s3",*FIGHTER_KIND_LITTLEMAC,20.0),("special_n_max_dash",*FIGHTER_KIND_LITTLEMAC,f32::INFINITY),("special_n_max_dash_turn",*FIGHTER_KIND_LITTLEMAC,f32::INFINITY)];
         let mut found = false;
         for i in &cancel_black{
-            if MotionModule::motion_kind(module_accessor) == smash::hash40(i.0) && (fighter_kind == i.1 || i.1 == 999) && MotionModule::frame(module_accessor) <= i.2{
+            if MotionModule::motion_kind(module_accessor) == smash::hash40(i.0) && (i.1 == fighter_kind || i.1 == 999) && MotionModule::frame(module_accessor) <= i.2{
                 found = true;
+                println!("Found");
                 break;
             }
         }  
         if found == false{
-            if MotionModule::frame(module_accessor) >= 10.0{
-                if AttackModule::is_infliction_status(module_accessor, *COLLISION_KIND_MASK_HIT) && !CatchModule::is_catch(module_accessor) && situation_kind == SITUATION_KIND_GROUND && status_kind != *FIGHTER_STATUS_KIND_FINAL{
-                    CancelModule::enable_cancel(module_accessor);
+            if !((fighter_kind == *FIGHTER_KIND_MARTH || fighter_kind == *FIGHTER_KIND_LUCINA) && (status_kind == *FIGHTER_STATUS_KIND_SPECIAL_S || (status_kind == *FIGHTER_MARTH_STATUS_KIND_SPECIAL_S4 && MotionModule::frame(module_accessor) < 22.0))){
+                if MotionModule::frame(module_accessor) >= 15.0 - 2.0{
+                    if AttackModule::is_infliction_status(module_accessor, *COLLISION_KIND_MASK_HIT) && !CatchModule::is_catch(module_accessor) && situation_kind == SITUATION_KIND_GROUND && status_kind != *FIGHTER_STATUS_KIND_FINAL{
+                        CancelModule::enable_cancel(module_accessor);
+                    }
                 }
             }
         }
@@ -213,12 +229,6 @@ pub fn global_fighter_frame(fighter : &mut L2CFighterCommon) {
                 seen_de[x][player_no] = false;
             }
         }
-        //grab ranges
-        if fighter_kind == *FIGHTER_KIND_MARTH{
-            GrabModule::set_size_mul(module_accessor,100.0);
-        } else{
-            GrabModule::set_size_mul(module_accessor,2.2);
-        }
 
         //airdodge from jumpsquat
         if status_kind == FIGHTER_STATUS_KIND_JUMP_SQUAT && ControlModule::check_button_trigger(module_accessor,*CONTROL_PAD_BUTTON_GUARD){
@@ -243,7 +253,7 @@ pub fn global_fighter_frame(fighter : &mut L2CFighterCommon) {
 }
 
 #[smashline::weapon_frame(agent = WEAPON_KIND_DEDEDE_GORDO)]
-pub fn gordo_frame(weapon: &mut L2CFighterBase){
+fn gordo_frame(weapon: &mut L2CFighterBase){
     unsafe{
         let module_accessor = smash::app::sv_system::battle_object_module_accessor(weapon.lua_state_agent);
         HitModule::set_whole(module_accessor, smash::app::HitStatus(*HIT_STATUS_XLU), 0); 
@@ -452,6 +462,13 @@ fn luigi_frame(fighter: &mut L2CFighterCommon) {
         let module_accessor = smash::app::sv_system::battle_object_module_accessor(fighter.lua_state_agent);
         let player_no : usize = CameraModule::get_player_no(module_accessor,0) as usize;
         let situation_kind = StatusModule::situation_kind(module_accessor);
+
+        if ControlModule::get_stick_x(module_accessor).abs() < 0.3 && ControlModule::get_stick_y(module_accessor).abs() < 0.3{
+            if ControlModule::check_button_trigger(module_accessor, *CONTROL_PAD_BUTTON_SPECIAL){
+                mode[player_no] = !(mode[player_no]);
+            }
+        }
+
         if mode[player_no]{
             AttackModule::set_power_mul(module_accessor,1.5);
             GroundModule::set_collidable(module_accessor,false);
@@ -470,6 +487,54 @@ fn luigi_frame(fighter: &mut L2CFighterCommon) {
     }
 }
 
+#[smashline::fighter_frame(agent = FIGHTER_KIND_MARTH)]
+fn marth_frame(fighter: &mut L2CFighterCommon){
+    unsafe{
+        let module_accessor = smash::app::sv_system::battle_object_module_accessor(fighter.lua_state_agent);
+        let situation_kind = StatusModule::situation_kind(module_accessor);
+        let status_kind = smash::app::lua_bind::StatusModule::status_kind(module_accessor);
+        let player_no : usize = CameraModule::get_player_no(module_accessor,0) as usize;
+        let situation_kind = StatusModule::situation_kind(module_accessor);
+
+        if AttackModule::is_infliction(module_accessor, *COLLISION_KIND_MASK_HIT) && DamageModule::damage(module_accessor, 0) > 0.0 && !(status_kind == *FIGHTER_MARTH_STATUS_KIND_SPECIAL_S4){
+            DamageModule::add_damage(module_accessor, -2.5, 0);
+        }
+
+        if CatchModule::is_catch(module_accessor){
+            marth_timer[player_no] = 420;
+        }
+
+        if marth_timer[player_no] <= 0{
+            GrabModule::set_size_mul(module_accessor,9999.0);
+        } else{
+            GrabModule::set_size_mul(module_accessor,1.0);
+            marth_timer[player_no]-=1;
+        }
+    }
+}
+
+#[smashline::fighter_frame(agent = FIGHTER_KIND_LUCINA)]
+fn lucina_frame(fighter: &mut L2CFighterCommon){
+    unsafe{
+        let module_accessor = smash::app::sv_system::battle_object_module_accessor(fighter.lua_state_agent);
+        let situation_kind = StatusModule::situation_kind(module_accessor);
+        let status_kind = smash::app::lua_bind::StatusModule::status_kind(module_accessor);
+        let player_no : usize = CameraModule::get_player_no(module_accessor,0) as usize;
+        GrabModule::set_size_mul(module_accessor,9999.0);
+
+        if status_kind == *FIGHTER_STATUS_KIND_DAMAGE{
+            lucina_mul[player_no] = 1.0;
+        }
+
+        if AttackModule::is_infliction(module_accessor, *COLLISION_KIND_MASK_HIT) && !(status_kind == *FIGHTER_MARTH_STATUS_KIND_SPECIAL_S4){
+            lucina_mul[player_no] += 0.05;
+        }
+
+        AttackModule::set_power_mul(module_accessor, lucina_mul[player_no]);
+    }
+}
+
+
 pub fn install() {
     install_agent_frames!(
         global_fighter_frame,
@@ -484,7 +549,10 @@ pub fn install() {
         ness_frame,
         luigi_frame,
 
-        gordo_frame
+        marth_frame,
+        lucina_frame,
+
+        gordo_frame,
     );
 
     install_agent_init_callbacks!(

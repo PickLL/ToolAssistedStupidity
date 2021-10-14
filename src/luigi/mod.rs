@@ -41,15 +41,13 @@ pub fn luigi_neutralb(fighter: &mut L2CAgentBase) {
         let situation_kind = StatusModule::situation_kind(module_accessor);
         let player_no : usize = CameraModule::get_player_no(module_accessor,0) as usize;
         acmd!(lua_state,{
-            frame(frame = 2)
+            frame(frame=1)
             rust{
                 if situation_kind == SITUATION_KIND_GROUND{
                     StatusModule::change_status_request_from_script(module_accessor,*FIGHTER_STATUS_KIND_WAIT, true);
                 }else{
                     StatusModule::change_status_request_from_script(module_accessor,*FIGHTER_STATUS_KIND_FALL, true);
                 }
-
-                mode[player_no] = !mode[player_no];
             }
         });
     }
