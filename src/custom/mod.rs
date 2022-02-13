@@ -160,7 +160,7 @@ pub fn global_fighter_frame(fighter : &mut L2CFighterCommon) {
         ("special_air_lw",*FIGHTER_KIND_CAPTAIN,0.0),("special_lw",*FIGHTER_KIND_CAPTAIN,0.0),("special_s_loop",*FIGHTER_KIND_YOSHI,0.0),("special_air_s_loop",*FIGHTER_KIND_YOSHI,0.0),
         ("special_air_s_start",*FIGHTER_KIND_YOSHI,5.0),("special_air_s",*FIGHTER_KIND_PURIN,0.0),("special_s",*FIGHTER_KIND_PURIN,0.0),
         ("special_air_hi",*FIGHTER_KIND_SHEIK,0.0),("special_air_hi_start",*FIGHTER_KIND_SHEIK,0.0),("special_lw_attack",*FIGHTER_KIND_SHEIK,0.0),
-        ("special_air_lw",*FIGHTER_KIND_SHEIK,0.0),("special_lw",*FIGHTER_KIND_SHEIK,0.0)];
+        ("special_air_lw",*FIGHTER_KIND_SHEIK,0.0),("special_lw",*FIGHTER_KIND_SHEIK,0.0),("special_air_lw",*FIGHTER_KIND_KOOPA,0.0),("special_lw",*FIGHTER_KIND_KOOPA,0.0)];
         for i in &cancel_jump{
             if MotionModule::motion_kind(module_accessor) == smash::hash40(i.0) && fighter_kind == i.1 && MotionModule::frame(module_accessor) >= i.2{
                 if WorkModule::get_int(module_accessor,*FIGHTER_INSTANCE_WORK_ID_INT_JUMP_COUNT) != WorkModule::get_int(module_accessor,*FIGHTER_INSTANCE_WORK_ID_INT_JUMP_COUNT_MAX){

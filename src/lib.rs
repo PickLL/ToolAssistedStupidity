@@ -23,6 +23,8 @@ mod falco;
 
 mod sheik;
 
+mod koopa;
+
 mod marth;
 
 mod lucina;
@@ -56,6 +58,8 @@ pub fn install() {
     lucina::install();
 
     sheik::install();
+
+    koopa::install();
 
     dedede::install();
 
