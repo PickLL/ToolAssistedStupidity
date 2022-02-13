@@ -34,7 +34,7 @@ mod littlemac;
 mod custom;
 
 #[skyline::main(name = "TAS")]
-pub fn main() {
+pub fn install() {
     mario::install();
     donkey::install();
     link::install();

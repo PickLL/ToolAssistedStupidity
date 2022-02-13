@@ -19,6 +19,8 @@ use crate::marth::*;
 
 use crate::lucina::*;
 
+use crate::falco::*;
+
 use smashline::*;
 
 pub static mut status_de : [u32; 8] = [0; 8];
@@ -111,7 +113,7 @@ pub fn pcReset(module_accessor : &mut smash::cpp::root::app::BattleObjectModuleA
     }
 }
 
-#[smashline::fighter_frame(global)]
+#[smashline::fighter_frame_callback]
 pub fn global_fighter_frame(fighter : &mut L2CFighterCommon) {
     unsafe {
         let module_accessor = smash::app::sv_system::battle_object_module_accessor(fighter.lua_state_agent);
@@ -249,310 +251,224 @@ pub fn global_fighter_frame(fighter : &mut L2CFighterCommon) {
         }else if situation_kind == SITUATION_KIND_GROUND && llc[player_no]{
             llc[player_no] = false;
         }
-    }
-}
 
-#[smashline::weapon_frame(agent = WEAPON_KIND_DEDEDE_GORDO)]
-fn gordo_frame(weapon: &mut L2CFighterBase){
-    unsafe{
-        let module_accessor = smash::app::sv_system::battle_object_module_accessor(weapon.lua_state_agent);
-        HitModule::set_whole(module_accessor, smash::app::HitStatus(*HIT_STATUS_XLU), 0); 
-    }
-}
+        //Per Character --------------------------------------------------------------------------------------------------------------------------
 
-#[smashline::fighter_frame(agent = FIGHTER_KIND_DONKEY)]
-fn donkey_frame(fighter: &mut L2CFighterCommon) {
-    unsafe {
-        let module_accessor = smash::app::sv_system::battle_object_module_accessor(fighter.lua_state_agent);
-        if DamageModule::damage(module_accessor,0) == 999.0{
-            AttackModule::set_power_mul(module_accessor,2.0)
+        if fighter_kind == *FIGHTER_KIND_DONKEY{
+            if DamageModule::damage(module_accessor,0) == 999.0{
+                AttackModule::set_power_mul(module_accessor,2.0)
             } else{
                 AttackModule::set_power_mul(module_accessor,1.0)
             }
-    }
-}
-
-#[smashline::fighter_frame(agent = FIGHTER_KIND_FOX)]
-fn fox_frame(fighter: &mut L2CFighterCommon) {
-    unsafe {
-        let module_accessor = smash::app::sv_system::battle_object_module_accessor(fighter.lua_state_agent);
-        let status_kind = smash::app::lua_bind::StatusModule::status_kind(module_accessor);
-        let situation_kind = StatusModule::situation_kind(module_accessor);
-        if [*FIGHTER_FOX_STATUS_KIND_SPECIAL_LW_END, *FIGHTER_FOX_STATUS_KIND_SPECIAL_LW_LOOP, *FIGHTER_FOX_STATUS_KIND_SPECIAL_LW_HIT, *FIGHTER_STATUS_KIND_SPECIAL_LW].contains(&status_kind) {
-            if WorkModule::get_int(module_accessor,*FIGHTER_INSTANCE_WORK_ID_INT_JUMP_COUNT) != WorkModule::get_int(module_accessor,*FIGHTER_INSTANCE_WORK_ID_INT_JUMP_COUNT_MAX){
-                if ControlModule::check_button_trigger(module_accessor, *CONTROL_PAD_BUTTON_JUMP) {
-                    if situation_kind == SITUATION_KIND_GROUND{
-                        StatusModule::change_status_request_from_script(module_accessor,*FIGHTER_STATUS_KIND_JUMP_SQUAT, true);
-                    } else{
-                        StatusModule::change_status_request_from_script(module_accessor,*FIGHTER_STATUS_KIND_JUMP_AERIAL, true);
+        } else if fighter_kind == *FIGHTER_KIND_FOX {
+            if [*FIGHTER_FOX_STATUS_KIND_SPECIAL_LW_END, *FIGHTER_FOX_STATUS_KIND_SPECIAL_LW_LOOP, *FIGHTER_FOX_STATUS_KIND_SPECIAL_LW_HIT, *FIGHTER_STATUS_KIND_SPECIAL_LW].contains(&status_kind) {
+                if WorkModule::get_int(module_accessor,*FIGHTER_INSTANCE_WORK_ID_INT_JUMP_COUNT) != WorkModule::get_int(module_accessor,*FIGHTER_INSTANCE_WORK_ID_INT_JUMP_COUNT_MAX){
+                    if ControlModule::check_button_trigger(module_accessor, *CONTROL_PAD_BUTTON_JUMP) {
+                        if situation_kind == SITUATION_KIND_GROUND{
+                            StatusModule::change_status_request_from_script(module_accessor,*FIGHTER_STATUS_KIND_JUMP_SQUAT, true);
+                        } else{
+                            StatusModule::change_status_request_from_script(module_accessor,*FIGHTER_STATUS_KIND_JUMP_AERIAL, true);
+                        }
                     }
                 }
             }
-        }
-
-        if [*FIGHTER_FOX_STATUS_KIND_SPECIAL_HI_RUSH,*FIGHTER_FOX_STATUS_KIND_SPECIAL_HI_BOUND,*FIGHTER_FOX_STATUS_KIND_SPECIAL_HI_RUSH_END].contains(&status_kind) && AttackModule::is_infliction_status(module_accessor, *COLLISION_KIND_MASK_HIT){
-            if situation_kind == SITUATION_KIND_GROUND{
-                StatusModule::change_status_request_from_script(module_accessor,*FIGHTER_STATUS_KIND_WAIT, true);
-            } else{
-                StatusModule::change_status_request_from_script(module_accessor,*FIGHTER_STATUS_KIND_FALL, true);
+    
+            if [*FIGHTER_FOX_STATUS_KIND_SPECIAL_HI_RUSH,*FIGHTER_FOX_STATUS_KIND_SPECIAL_HI_BOUND,*FIGHTER_FOX_STATUS_KIND_SPECIAL_HI_RUSH_END].contains(&status_kind) && AttackModule::is_infliction_status(module_accessor, *COLLISION_KIND_MASK_HIT){
+                if situation_kind == SITUATION_KIND_GROUND{
+                    StatusModule::change_status_request_from_script(module_accessor,*FIGHTER_STATUS_KIND_WAIT, true);
+                } else{
+                    StatusModule::change_status_request_from_script(module_accessor,*FIGHTER_STATUS_KIND_FALL, true);
+                }
             }
-        }
-    }
-}
-
-#[smashline::fighter_frame(agent = FIGHTER_KIND_FALCO)]
-fn falco_frame(fighter: &mut L2CFighterCommon) {
-    unsafe {
-        let module_accessor = smash::app::sv_system::battle_object_module_accessor(fighter.lua_state_agent);
-        if [hash40("special_lw"),hash40("special_lw_r"),hash40("special_air_lw"),hash40("special_air_lw_r")].contains(&MotionModule::motion_kind(module_accessor)){
-            if WorkModule::get_int(module_accessor,*FIGHTER_INSTANCE_WORK_ID_INT_JUMP_COUNT) != WorkModule::get_int(module_accessor,*FIGHTER_INSTANCE_WORK_ID_INT_JUMP_COUNT_MAX){
-                if ControlModule::check_button_trigger(module_accessor, *CONTROL_PAD_BUTTON_JUMP) {
+        } else if fighter_kind == *FIGHTER_KIND_FALCO {
+            if [hash40("special_lw"),hash40("special_lw_r"),hash40("special_air_lw"),hash40("special_air_lw_r")].contains(&MotionModule::motion_kind(module_accessor)){
+                if WorkModule::get_int(module_accessor,*FIGHTER_INSTANCE_WORK_ID_INT_JUMP_COUNT) != WorkModule::get_int(module_accessor,*FIGHTER_INSTANCE_WORK_ID_INT_JUMP_COUNT_MAX){
+                    if ControlModule::check_button_trigger(module_accessor, *CONTROL_PAD_BUTTON_JUMP) {
+                        if situation_kind == SITUATION_KIND_GROUND{
+                            StatusModule::change_status_request_from_script(module_accessor,*FIGHTER_STATUS_KIND_JUMP_SQUAT, true);
+                        } else{
+                            StatusModule::change_status_request_from_script(module_accessor,*FIGHTER_STATUS_KIND_JUMP_AERIAL, true);
+                        }
+                    }
+                }
+                if antiStall[player_no] > 15{
+                    let y_vel = KineticModule::get_sum_speed_y(module_accessor, *KINETIC_ENERGY_RESERVE_ATTRIBUTE_MAIN);
+                    if y_vel <= 0.0{
+                        let speedVec = Vector3f{x: 0.0, y: -5.0, z: 0.0};
+                        KineticModule::add_speed(module_accessor, &speedVec);
+                    }
+                } else{
+                    let y_vel = KineticModule::get_sum_speed_y(module_accessor, *KINETIC_ENERGY_RESERVE_ATTRIBUTE_MAIN);
+                    if y_vel <= 0.0{
+                        let speedVec = Vector3f{x: 0.0, y: 0.6, z: 0.0};
+                        KineticModule::add_speed(module_accessor, &speedVec);
+                    }
+                }
+            }
+            if situation_kind == SITUATION_KIND_GROUND && antiStall[player_no] != 0{
+                antiStall[player_no] = 0;
+            }
+        } else if fighter_kind == *FIGHTER_KIND_SAMUS {
+            let module_accessor = smash::app::sv_system::battle_object_module_accessor(fighter.lua_state_agent);
+            let cshot = WorkModule::get_int(module_accessor,*FIGHTER_SAMUS_INSTANCE_WORK_ID_INT_SPECIAL_N_COUNT);
+            AttackModule::set_power_mul(module_accessor,1.0+(cshot as f32/1350.0));
+        } else if fighter_kind == *FIGHTER_KIND_MARIO {
+            if status_kind == *FIGHTER_MARIO_STATUS_KIND_SPECIAL_LW_SHOOT{
+                if is_button_at_all(module_accessor){
                     CancelModule::enable_cancel(module_accessor);
                 }
             }
-        }
-    }
-}
-
-#[smashline::fighter_frame(agent = FIGHTER_KIND_SAMUS)]
-fn samus_frame(fighter: &mut L2CFighterCommon) {
-    unsafe {
-        let module_accessor = smash::app::sv_system::battle_object_module_accessor(fighter.lua_state_agent);
-        let cshot = WorkModule::get_int(module_accessor,*FIGHTER_SAMUS_INSTANCE_WORK_ID_INT_SPECIAL_N_COUNT);
-        AttackModule::set_power_mul(module_accessor,1.0+(cshot as f32/1350.0));
-    }
-}
-
-#[smashline::fighter_frame(agent = FIGHTER_KIND_MARIO)]
-fn mario_frame(fighter: &mut L2CFighterCommon) {
-    unsafe {
-        let module_accessor = smash::app::sv_system::battle_object_module_accessor(fighter.lua_state_agent);
-        let status_kind = smash::app::lua_bind::StatusModule::status_kind(module_accessor);
-        if status_kind == *FIGHTER_MARIO_STATUS_KIND_SPECIAL_LW_SHOOT{
-            if is_button_at_all(module_accessor){
-                CancelModule::enable_cancel(module_accessor);
+            AttackModule::set_power_mul(module_accessor,1.1);
+    
+            if AttackModule::is_infliction_status(module_accessor, *COLLISION_KIND_MASK_HIT) && WorkModule::get_int(module_accessor,*FIGHTER_INSTANCE_WORK_ID_INT_JUMP_COUNT) != 0{
+                WorkModule::set_int(module_accessor,1,*FIGHTER_INSTANCE_WORK_ID_INT_JUMP_COUNT);
             }
-        }
-        AttackModule::set_power_mul(module_accessor,1.1);
-
-        if AttackModule::is_infliction_status(module_accessor, *COLLISION_KIND_MASK_HIT) && WorkModule::get_int(module_accessor,*FIGHTER_INSTANCE_WORK_ID_INT_JUMP_COUNT) != 0{
-            WorkModule::set_int(module_accessor,1,*FIGHTER_INSTANCE_WORK_ID_INT_JUMP_COUNT);
-        }
-    }
-}
-
-#[smashline::fighter_frame(agent = FIGHTER_KIND_KIRBY)]
-fn kirb_frame(fighter: &mut L2CFighterCommon) {
-    unsafe {
-        let module_accessor = smash::app::sv_system::battle_object_module_accessor(fighter.lua_state_agent);
-        let situation_kind = StatusModule::situation_kind(module_accessor);
-        let player_no : usize = CameraModule::get_player_no(module_accessor,0) as usize;
-        if situation_kind == SITUATION_KIND_GROUND{
-        upb[player_no] = false;
-        }
-    }
-}
-
-#[smashline::fighter_frame(agent = FIGHTER_KIND_NESS)]
-fn ness_frame(fighter: &mut L2CFighterCommon) {
-    unsafe {
-        let module_accessor = smash::app::sv_system::battle_object_module_accessor(fighter.lua_state_agent);
-        let situation_kind = StatusModule::situation_kind(module_accessor);
-        let status_kind = smash::app::lua_bind::StatusModule::status_kind(module_accessor);
-        let player_no : usize = CameraModule::get_player_no(module_accessor,0) as usize;
-        let situation_kind = StatusModule::situation_kind(module_accessor);
-
-        if [*FIGHTER_NESS_STATUS_KIND_SPECIAL_LW_END, *FIGHTER_NESS_STATUS_KIND_SPECIAL_LW_HOLD, *FIGHTER_NESS_STATUS_KIND_SPECIAL_LW_HIT, *FIGHTER_STATUS_KIND_SPECIAL_LW].contains(&status_kind) {
-            if WorkModule::get_int(module_accessor,*FIGHTER_INSTANCE_WORK_ID_INT_JUMP_COUNT) != WorkModule::get_int(module_accessor,*FIGHTER_INSTANCE_WORK_ID_INT_JUMP_COUNT_MAX){
-                if ControlModule::check_button_trigger(module_accessor, *CONTROL_PAD_BUTTON_JUMP) {
-                    if situation_kind == SITUATION_KIND_GROUND{
-                        StatusModule::change_status_request_from_script(module_accessor,*FIGHTER_STATUS_KIND_JUMP_SQUAT, true);
-                    } else{
-                        StatusModule::change_status_request_from_script(module_accessor,*FIGHTER_STATUS_KIND_JUMP_AERIAL, true);
+        } else if fighter_kind == *FIGHTER_KIND_KIRBY {
+            if situation_kind == SITUATION_KIND_GROUND{
+                upb[player_no] = false;
+            }
+        } else if fighter_kind == *FIGHTER_KIND_NESS {
+            if [*FIGHTER_NESS_STATUS_KIND_SPECIAL_LW_END, *FIGHTER_NESS_STATUS_KIND_SPECIAL_LW_HOLD, *FIGHTER_NESS_STATUS_KIND_SPECIAL_LW_HIT, *FIGHTER_STATUS_KIND_SPECIAL_LW].contains(&status_kind) {
+                if WorkModule::get_int(module_accessor,*FIGHTER_INSTANCE_WORK_ID_INT_JUMP_COUNT) != WorkModule::get_int(module_accessor,*FIGHTER_INSTANCE_WORK_ID_INT_JUMP_COUNT_MAX){
+                    if ControlModule::check_button_trigger(module_accessor, *CONTROL_PAD_BUTTON_JUMP) {
+                        if situation_kind == SITUATION_KIND_GROUND{
+                            StatusModule::change_status_request_from_script(module_accessor,*FIGHTER_STATUS_KIND_JUMP_SQUAT, true);
+                        } else{
+                            StatusModule::change_status_request_from_script(module_accessor,*FIGHTER_STATUS_KIND_JUMP_AERIAL, true);
+                        }
                     }
                 }
             }
-        }
-    }
-}
-
-#[smashline::fighter_frame(agent = FIGHTER_KIND_DUCKHUNT)]
-fn duckhunt_frame(fighter: &mut L2CFighterCommon) {
-    unsafe {
-        let module_accessor = smash::app::sv_system::battle_object_module_accessor(fighter.lua_state_agent);
-        let situation_kind = StatusModule::situation_kind(module_accessor);
-        let status_kind = smash::app::lua_bind::StatusModule::status_kind(module_accessor);
-        let frame = smash::app::lua_bind::MotionModule::frame(module_accessor) as i32;
-        if frame == 1{
-            DamageModule::add_damage(module_accessor,1.0,0);
-        }
-        AttackModule::set_power_mul(module_accessor,0.333);
-
-        if status_kind == *FIGHTER_STATUS_KIND_DEAD{
-            GroundModule::set_collidable(module_accessor,true);
-        }
-
-        if smash::app::sv_math::rand(hash40("fighter"), 500) == 0 {
-            if situation_kind == SITUATION_KIND_GROUND{
-                StatusModule::change_status_request_from_script(module_accessor, *FIGHTER_STATUS_KIND_SLEEP_START, true); 
+        } else if fighter_kind == *FIGHTER_KIND_DUCKHUNT {
+            if frame == 1{
+                DamageModule::add_damage(module_accessor,1.0,0);
             }
-        }
-        if smash::app::sv_math::rand(hash40("fighter"), 500) == 0 {
-            if situation_kind == SITUATION_KIND_GROUND{
-                GroundModule::set_collidable(module_accessor,false);
-                StatusModule::change_status_request_from_script(module_accessor, *FIGHTER_STATUS_KIND_FALL, true);
+            AttackModule::set_power_mul(module_accessor,0.333);
+    
+            if status_kind == *FIGHTER_STATUS_KIND_DEAD{
+                GroundModule::set_collidable(module_accessor,true);
             }
-        }
-        if MotionModule::end_frame(module_accessor) as i32 == frame + 15{
-            if situation_kind == SITUATION_KIND_AIR{
-                StatusModule::change_status_request_from_script(module_accessor, *FIGHTER_STATUS_KIND_FALL_SPECIAL, true); 
-            }
-        }
-    }
-}
-
-#[smashline::fighter_frame(agent = FIGHTER_KIND_PIKACHU)]
-fn pikachu_frame(fighter: &mut L2CFighterCommon) {
-    unsafe {
-        let module_accessor = smash::app::sv_system::battle_object_module_accessor(fighter.lua_state_agent);
-        let player_no : usize = CameraModule::get_player_no(module_accessor,0) as usize;
-        let status_kind = smash::app::lua_bind::StatusModule::status_kind(module_accessor);
-
-        //add static charge on character death
-        //in status_de 2 is dead 1 is spawn
-        for x in 0..8{
-            if status_de[x] == 2 && seen_de[player_no][x] == false{
-                staticCharge[player_no] += 1;
-                seen_de[player_no][x] = true;
-                if x == player_no{
-                    wfr[player_no] = true;
+    
+            if smash::app::sv_math::rand(hash40("fighter"), 500) == 0 {
+                if situation_kind == SITUATION_KIND_GROUND{
+                    StatusModule::change_status_request_from_script(module_accessor, *FIGHTER_STATUS_KIND_SLEEP_START, true); 
                 }
-            } else if status_de[x] == 1 && seen_de[player_no][x] == false && x == player_no{
-                staticCharge[player_no] = staticDef;
-                seen_de[player_no][x] = true;
             }
-        }
-
-        if status_kind == *FIGHTER_STATUS_KIND_REBIRTH && wfr[player_no]{
-            effect_follow(module_accessor,Hash40::new("pikachu_elec2"), Hash40::new("top"),&Vector3f{x:0.8,y:4.0,z:0.0},&Vector3f{x:0.0,y:0.0,z:0.0},1.0);
-            hasElec[player_no] = true;
-            wfr[player_no] = false
-        }
-
-        //spawn/kill static effects
-
-        if staticCharge[player_no] == 0 && hasElec[player_no]{
-            kill_kind(module_accessor,Hash40::new("pikachu_elec2"));
-            hasElec[player_no] = false;
-        } else if staticCharge[player_no] >= 1 && !hasElec[player_no]{
-            effect_follow(module_accessor,Hash40::new("pikachu_elec2"), Hash40::new("top"),&Vector3f{x:0.8,y:4.0,z:0.0},&Vector3f{x:0.0,y:0.0,z:0.0},1.0);
-            hasElec[player_no] = true;
-        }
-        //cheat lol
-        if smash::app::smashball::is_training_mode(){
-             staticCharge[player_no] = 999;
-        }
-
-    }
-}
-
-#[smashline::fighter_frame(agent = FIGHTER_KIND_LUIGI)]
-fn luigi_frame(fighter: &mut L2CFighterCommon) {
-    unsafe {
-        let module_accessor = smash::app::sv_system::battle_object_module_accessor(fighter.lua_state_agent);
-        let player_no : usize = CameraModule::get_player_no(module_accessor,0) as usize;
-        let situation_kind = StatusModule::situation_kind(module_accessor);
-
-        if ControlModule::get_stick_x(module_accessor).abs() < 0.3 && ControlModule::get_stick_y(module_accessor).abs() < 0.3{
-            if ControlModule::check_button_trigger(module_accessor, *CONTROL_PAD_BUTTON_SPECIAL){
-                mode[player_no] = !(mode[player_no]);
+            if smash::app::sv_math::rand(hash40("fighter"), 500) == 0 {
+                if situation_kind == SITUATION_KIND_GROUND{
+                    GroundModule::set_collidable(module_accessor,false);
+                    StatusModule::change_status_request_from_script(module_accessor, *FIGHTER_STATUS_KIND_FALL, true);
+                }
             }
-        }
-
-        if mode[player_no]{
-            AttackModule::set_power_mul(module_accessor,1.5);
-            GroundModule::set_collidable(module_accessor,false);
-            let y_vel = KineticModule::get_sum_speed_y(module_accessor, *KINETIC_ENERGY_RESERVE_ATTRIBUTE_MAIN);
-            if y_vel <= 0.0{
-                let speedVec = Vector3f{x: 0.0, y: 0.07, z: 0.0};
-                KineticModule::add_speed(module_accessor, &speedVec);
+            if MotionModule::end_frame(module_accessor) as i32 == frame + 15{
+                if situation_kind == SITUATION_KIND_AIR{
+                    StatusModule::change_status_request_from_script(module_accessor, *FIGHTER_STATUS_KIND_FALL_SPECIAL, true); 
+                }
             }
-            if situation_kind == SITUATION_KIND_GROUND{
-                StatusModule::change_status_request_from_script(module_accessor, *FIGHTER_STATUS_KIND_FALL, true);
+        } else if fighter_kind == *FIGHTER_KIND_PIKACHU {
+            //add static charge on character death
+            //in status_de 2 is dead 1 is spawn
+            for x in 0..8{
+                if status_de[x] == 2 && seen_de[player_no][x] == false{
+                    staticCharge[player_no] += 1;
+                    seen_de[player_no][x] = true;
+                    if x == player_no{
+                        wfr[player_no] = true;
+                    }
+                } else if status_de[x] == 1 && seen_de[player_no][x] == false && x == player_no{
+                    staticCharge[player_no] = staticDef;
+                    seen_de[player_no][x] = true;
+                }
             }
-        } else{
-            AttackModule::set_power_mul(module_accessor,1.0);
-            GroundModule::set_collidable(module_accessor,true);
-        }
-    }
-}
 
-#[smashline::fighter_frame(agent = FIGHTER_KIND_MARTH)]
-fn marth_frame(fighter: &mut L2CFighterCommon){
-    unsafe{
-        let module_accessor = smash::app::sv_system::battle_object_module_accessor(fighter.lua_state_agent);
-        let situation_kind = StatusModule::situation_kind(module_accessor);
-        let status_kind = smash::app::lua_bind::StatusModule::status_kind(module_accessor);
-        let player_no : usize = CameraModule::get_player_no(module_accessor,0) as usize;
-        let situation_kind = StatusModule::situation_kind(module_accessor);
+            if status_kind == *FIGHTER_STATUS_KIND_REBIRTH && wfr[player_no]{
+                effect_follow(module_accessor,Hash40::new("pikachu_elec2"), Hash40::new("top"),&Vector3f{x:0.8,y:4.0,z:0.0},&Vector3f{x:0.0,y:0.0,z:0.0},1.0);
+                hasElec[player_no] = true;
+                wfr[player_no] = false
+            }
 
-        if AttackModule::is_infliction(module_accessor, *COLLISION_KIND_MASK_HIT) && DamageModule::damage(module_accessor, 0) > 0.0 && !(status_kind == *FIGHTER_MARTH_STATUS_KIND_SPECIAL_S4){
-            DamageModule::add_damage(module_accessor, -2.5, 0);
-        }
+            //spawn/kill static effects
 
-        if CatchModule::is_catch(module_accessor){
-            marth_timer[player_no] = 420;
-        }
-
-        if marth_timer[player_no] <= 0{
+            if staticCharge[player_no] == 0 && hasElec[player_no]{
+                kill_kind(module_accessor,Hash40::new("pikachu_elec2"));
+                hasElec[player_no] = false;
+            } else if staticCharge[player_no] >= 1 && !hasElec[player_no]{
+                effect_follow(module_accessor,Hash40::new("pikachu_elec2"), Hash40::new("top"),&Vector3f{x:0.8,y:4.0,z:0.0},&Vector3f{x:0.0,y:0.0,z:0.0},1.0);
+                hasElec[player_no] = true;
+            }
+            //cheat lol
+            if smash::app::smashball::is_training_mode(){
+                staticCharge[player_no] = 999;
+            }
+        } else if fighter_kind == *FIGHTER_KIND_LUIGI {
+            if ControlModule::get_stick_x(module_accessor).abs() < 0.3 && ControlModule::get_stick_y(module_accessor).abs() < 0.3{
+                if ControlModule::check_button_trigger(module_accessor, *CONTROL_PAD_BUTTON_SPECIAL){
+                    mode[player_no] = !(mode[player_no]);
+                }
+            }
+    
+            if mode[player_no]{
+                AttackModule::set_power_mul(module_accessor,1.5);
+                GroundModule::set_collidable(module_accessor,false);
+                let y_vel = KineticModule::get_sum_speed_y(module_accessor, *KINETIC_ENERGY_RESERVE_ATTRIBUTE_MAIN);
+                if y_vel <= 0.0{
+                    let speedVec = Vector3f{x: 0.0, y: 0.07, z: 0.0};
+                    KineticModule::add_speed(module_accessor, &speedVec);
+                }
+                if situation_kind == SITUATION_KIND_GROUND{
+                    StatusModule::change_status_request_from_script(module_accessor, *FIGHTER_STATUS_KIND_FALL, true);
+                }
+            } else{
+                AttackModule::set_power_mul(module_accessor,1.0);
+                GroundModule::set_collidable(module_accessor,true);
+            }
+        } else if fighter_kind == *FIGHTER_KIND_MARTH {
+            if AttackModule::is_infliction(module_accessor, *COLLISION_KIND_MASK_HIT) && DamageModule::damage(module_accessor, 0) > 0.0 && !(status_kind == *FIGHTER_MARTH_STATUS_KIND_SPECIAL_S4){
+                DamageModule::add_damage(module_accessor, -2.5, 0);
+            }
+    
+            if CatchModule::is_catch(module_accessor){
+                marth_timer[player_no] = 420;
+            }
+    
+            if marth_timer[player_no] <= 0{
+                GrabModule::set_size_mul(module_accessor,9999.0);
+            } else{
+                GrabModule::set_size_mul(module_accessor,1.0);
+                marth_timer[player_no]-=1;
+            }
+        } else if fighter_kind == *FIGHTER_KIND_LUCINA {
             GrabModule::set_size_mul(module_accessor,9999.0);
-        } else{
-            GrabModule::set_size_mul(module_accessor,1.0);
-            marth_timer[player_no]-=1;
+
+            if status_kind == *FIGHTER_STATUS_KIND_DAMAGE{
+                lucina_mul[player_no] = 1.0;
+            }
+
+            if AttackModule::is_infliction(module_accessor, *COLLISION_KIND_MASK_HIT) && !(status_kind == *FIGHTER_MARTH_STATUS_KIND_SPECIAL_S4){
+                lucina_mul[player_no] += 0.05;
+            }
+
+            AttackModule::set_power_mul(module_accessor, lucina_mul[player_no]);
         }
     }
 }
 
-#[smashline::fighter_frame(agent = FIGHTER_KIND_LUCINA)]
-fn lucina_frame(fighter: &mut L2CFighterCommon){
+#[smashline::weapon_frame_callback]
+fn global_weapon_frame(weapon: &mut L2CFighterBase) {
     unsafe{
-        let module_accessor = smash::app::sv_system::battle_object_module_accessor(fighter.lua_state_agent);
-        let situation_kind = StatusModule::situation_kind(module_accessor);
-        let status_kind = smash::app::lua_bind::StatusModule::status_kind(module_accessor);
-        let player_no : usize = CameraModule::get_player_no(module_accessor,0) as usize;
-        GrabModule::set_size_mul(module_accessor,9999.0);
-
-        if status_kind == *FIGHTER_STATUS_KIND_DAMAGE{
-            lucina_mul[player_no] = 1.0;
+        let module_accessor = smash::app::sv_system::battle_object_module_accessor(weapon.lua_state_agent);
+        let kind = smash::app::utility::get_kind(module_accessor);
+        if kind == *WEAPON_KIND_DEDEDE_GORDO{
+            HitModule::set_whole(module_accessor, smash::app::HitStatus(*HIT_STATUS_XLU), 0); 
         }
-
-        if AttackModule::is_infliction(module_accessor, *COLLISION_KIND_MASK_HIT) && !(status_kind == *FIGHTER_MARTH_STATUS_KIND_SPECIAL_S4){
-            lucina_mul[player_no] += 0.05;
-        }
-
-        AttackModule::set_power_mul(module_accessor, lucina_mul[player_no]);
     }
 }
-
 
 pub fn install() {
-    install_agent_frames!(
+
+    install_agent_frame_callbacks!(
         global_fighter_frame,
-        donkey_frame,
-        fox_frame,
-        falco_frame,
-        samus_frame,
-        mario_frame,
-        kirb_frame,
-        duckhunt_frame,
-        pikachu_frame,
-        ness_frame,
-        luigi_frame,
-
-        marth_frame,
-        lucina_frame,
-
-        gordo_frame,
+        global_weapon_frame,
     );
 
     install_agent_init_callbacks!(

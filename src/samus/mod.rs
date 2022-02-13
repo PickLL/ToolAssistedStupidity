@@ -124,7 +124,7 @@ pub fn cshot_shoot(fighter: &mut L2CAgentBase) {
     });
 }
 
-#[acmd_script(agent = "samus_cshot",script = "game_specialhi",category = ACMD_GAME)]
+#[acmd_script(agent = "samus",script = "game_specialhi",category = ACMD_GAME)]
 pub fn samus_airupb(fighter: &mut L2CAgentBase) {
     let lua_state = fighter.lua_state_agent;
     acmd!(lua_state,{
